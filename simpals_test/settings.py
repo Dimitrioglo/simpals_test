@@ -38,7 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
+    'rest_framework_mongoengine',
+    'django_crontab',
+
     'client_api'
 ]
 
@@ -57,8 +61,7 @@ ROOT_URLCONF = 'simpals_test.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,19 +79,21 @@ WSGI_APPLICATION = 'simpals_test.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+MONGO_DB_TOKEN = 'mongodb+srv://client_database_user:aesthetic_pass@cluster0.gve1s.mongodb.net/simpalsTest?retryWrites=true&w=majority'
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'djongo',
-#         'NAME': 'client_api_database',
-#         'ENFORCE_SCHEMA': False,
-#         'CLIENT':   {
-#             'host': 'mongodb+srv://client_database_user:aesthetic_pass@cluster0.gve1s.mongodb.net/simpalsTest?retryWrites=true&w=majority'
-#         }
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'djongo',
+        'NAME': 'client_api_database',
+        'ENFORCE_SCHEMA': False,
+        'CLIENT':   {
+            'host': MONGO_DB_TOKEN
+        }
+    }
+}
 
-from mongoengine import connect
+
+connect(host=MONGO_DB_TOKEN)
 
 
 # Password validation
@@ -139,8 +144,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR.joinpath('static')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# updating mongodb data ““At every 15th minute.” set new timeout => https://crontab.guru/
+CRONJOBS = [
+    ('*/15 * * * *', 'client_api.cron.my_scheduled_job')
+]
